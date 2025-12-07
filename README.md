@@ -1,4 +1,4 @@
-# Distributed Calculator (JavaScript Version)
+# Distributed Calculator (Java Version)
 
 This project is a simple **distributed-style RMI**
 
