@@ -16,17 +16,19 @@ The calculator supports multiple operations such as:
 
 Just run by using this command in your terminal
 
-Step 1
+### Step 1
 
 ```
 javac *.java
 ```
-Step 2
+### Step 2
+Run the command and then open one more terminal. (Don't close the server after running it)
 
 ```
 java CalculatorServer
 ```
-Final Step
+### Final Step
+Open you other terminal to run this command.
 
 ```
 java CalculatorGUI
