@@ -1,23 +1,21 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import com.formdev.flatlaf.FlatLightLaf;
 
 public class CalculatorGUI extends JFrame {
 
-    private JTextField num1Field, num2Field;
-    private JComboBox<String> operatorBox;
+    private JTextField num1Field;
+    private JTextField num2Field;
     private JLabel resultLabel;
+    private JComboBox<String> operatorBox;
     private JTextArea historyArea;
-
     private Calculator calc;
 
     public CalculatorGUI() {
 
         setTitle("Modern RMI Calculator");
-        setSize(700, 380);
+        setSize(450, 420);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -39,71 +37,92 @@ public class CalculatorGUI extends JFrame {
 
     private void buildUI() {
 
-        setLayout(new BorderLayout(12, 12));
+        // ===== MAIN PANEL (card-like container) =====
+        JPanel mainPanel = new RoundedPanel(25);
+        mainPanel.setBackground(new Color(245, 245, 245));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        mainPanel.setLayout(new BorderLayout(15, 15));
 
-        JPanel left = new JPanel();
-        left.setLayout(new GridBagLayout());
-        left.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
+        add(mainPanel);
+
+        // ===== TOP INPUT AREA =====
+        JPanel inputPanel = new JPanel(new GridBagLayout());
+        inputPanel.setOpaque(false);
 
         GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(10, 10, 10, 10);
+        c.insets = new Insets(8, 8, 8, 8);
         c.fill = GridBagConstraints.HORIZONTAL;
 
-        // Title
-        JLabel title = new JLabel("RMI Calculator");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        // Row 1: Number 1
+        c.gridx = 0; c.gridy = 0;
+        inputPanel.add(label("Number 1:"), c);
 
-        c.gridx = 0; c.gridy = 0; c.gridwidth = 2;
-        left.add(title, c);
-
-        // Number 1
-        c.gridwidth = 1; c.gridx = 0; c.gridy = 1;
-        left.add(new JLabel("Number 1"), c);
-
-        num1Field = new JTextField();
+        num1Field = textField();
         c.gridx = 1;
-        left.add(num1Field, c);
+        inputPanel.add(num1Field, c);
 
-        // Operator
-        c.gridx = 0; c.gridy = 2;
-        left.add(new JLabel("Operator"), c);
+        // Row 2: Operator
+        c.gridx = 0; c.gridy = 1;
+        inputPanel.add(label("Operator:"), c);
 
         operatorBox = new JComboBox<>(new String[]{"+", "-", "*", "/"});
+        operatorBox.setFont(new Font("Arial", Font.PLAIN, 16));
         c.gridx = 1;
-        left.add(operatorBox, c);
+        inputPanel.add(operatorBox, c);
 
-        // Number 2
-        c.gridx = 0; c.gridy = 3;
-        left.add(new JLabel("Number 2"), c);
+        // Row 3: Number 2
+        c.gridx = 0; c.gridy = 2;
+        inputPanel.add(label("Number 2:"), c);
 
-        num2Field = new JTextField();
+        num2Field = textField();
         c.gridx = 1;
-        left.add(num2Field, c);
+        inputPanel.add(num2Field, c);
 
-        // Result
-        resultLabel = new JLabel("Result: —");
-        resultLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
-        c.gridx = 0; c.gridy = 4; c.gridwidth = 2;
-        left.add(resultLabel, c);
+        mainPanel.add(inputPanel, BorderLayout.NORTH);
 
-        // Button
+        // ===== RESULT LABEL =====
+        resultLabel = new JLabel("Result: ", SwingConstants.CENTER);
+        resultLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        resultLabel.setForeground(new Color(50, 50, 50));
+        resultLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        mainPanel.add(resultLabel, BorderLayout.CENTER);
+
+        // ===== BUTTON =====
         JButton calcBtn = new JButton("Calculate");
+        calcBtn.setFont(new Font("Arial", Font.BOLD, 16));
+        calcBtn.setBackground(new Color(0, 122, 255));
+        calcBtn.setForeground(Color.WHITE);
+        calcBtn.setFocusPainted(false);
+        calcBtn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        calcBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         calcBtn.addActionListener(e -> calculate());
-        calcBtn.setPreferredSize(new Dimension(140, 40));
-        c.gridy = 5; c.gridwidth = 2;
-        left.add(calcBtn, c);
 
-        add(left, BorderLayout.WEST);
+        mainPanel.add(calcBtn, BorderLayout.SOUTH);
 
-        // History Panel
+        // ===== HISTORY PANEL BELOW MAIN PANEL =====
+
         historyArea = new JTextArea();
         historyArea.setEditable(false);
         historyArea.setFont(new Font("Consolas", Font.PLAIN, 14));
+        historyArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        JScrollPane scroll = new JScrollPane(historyArea);
-        scroll.setBorder(BorderFactory.createTitledBorder("History"));
+        JScrollPane historyScroll = new JScrollPane(historyArea);
+        historyScroll.setBorder(BorderFactory.createTitledBorder("History"));
 
-        add(scroll, BorderLayout.CENTER);
+        add(historyScroll, BorderLayout.SOUTH);
+    }
+
+    private JLabel label(String txt) {
+        JLabel lbl = new JLabel(txt);
+        lbl.setFont(new Font("Arial", Font.PLAIN, 16));
+        return lbl;
+    }
+
+    private JTextField textField() {
+        JTextField tf = new JTextField();
+        tf.setFont(new Font("Arial", Font.PLAIN, 16));
+        return tf;
     }
 
     private void calculate() {
@@ -116,23 +135,57 @@ public class CalculatorGUI extends JFrame {
                 case "+" -> calc.add(a, b);
                 case "-" -> calc.subtract(a, b);
                 case "*" -> calc.multiply(a, b);
-                case "/" -> calc.divide(a, b);
+                case "/" -> {
+                    double r = calc.divide(a, b);
+                    if (Double.isNaN(r)) {
+                        JOptionPane.showMessageDialog(this,
+                                "Cannot divide by zero.",
+                                "Math Error",
+                                JOptionPane.WARNING_MESSAGE);
+                        yield Double.NaN;
+                    }
+                    yield r;
+                }
                 default -> 0;
             };
 
-            resultLabel.setText("Result: " + result);
+            if (!Double.isNaN(result))
+                resultLabel.setText("Result: " + result);
+
             historyArea.append(a + " " + op + " " + b + " = " + result + "\n");
 
-        } catch (Exception ex) {
+        } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this,
-                    "Error: " + ex.getMessage(),
+                    "Please enter valid numbers.",
+                    "Input Error",
+                    JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "RMI Error: " + e.getMessage(),
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
     }
 
+    // ===== CUSTOM ROUNDED PANEL =====
+    class RoundedPanel extends JPanel {
+        private int radius;
+
+        public RoundedPanel(int radius) {
+            this.radius = radius;
+            setOpaque(false);
+        }
+
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(getBackground());
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
+        }
+    }
+
     public static void main(String[] args) {
-        FlatLightLaf.setup(); // ⬅ modern UI theme
         SwingUtilities.invokeLater(() -> new CalculatorGUI().setVisible(true));
     }
 }

@@ -16,8 +16,8 @@ public class CalculatorServer implements Calculator {
     public static void main(String[] args) {
         try {
             CalculatorServer server = new CalculatorServer();
-            Calculator stub = 
-                (Calculator) UnicastRemoteObject.exportObject(server, 0);
+            Calculator stub =
+                    (Calculator) UnicastRemoteObject.exportObject(server, 0);
 
             LocateRegistry.createRegistry(1099);
             Registry registry = LocateRegistry.getRegistry();
